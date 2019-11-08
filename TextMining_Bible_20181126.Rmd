@@ -1,0 +1,312 @@
+---
+title: "Bible Analysis"
+author: "Jerry Tong"
+date: "October 27, 2018"
+output: html_document
+---
+
+
+Please make sure run step 1-3 BEFORE this code.
+
+
+
+
+```{r}
+# TAKING INTERSECT OF TOP 100 WORDS IN THESE 6 BOOKS, THEN COMPARING RANKS
+
+#note: some codes are still under tests. there are garbage codes.
+
+df_genesis_rank <- cbind(df_genesis[1], 1:nrow(df_genesis))
+df_genesis_top100 <- df_genesis[1:100,]
+df_proverbs_rank <- cbind(df_proverbs[1], 1:nrow(df_proverbs))
+df_proverbs_top100 <- df_proverbs[1:100,]
+df_psalms_rank <- cbind(df_psalms[1], 1:nrow(df_psalms))
+df_psalms_top100 <- df_psalms[1:100,]
+df_matthew_rank <- cbind(df_matthew[1], 1:nrow(df_matthew))
+df_matthew_top100 <- df_matthew[1:100,]
+df_john_rank <- cbind(df_john[1], 1:nrow(df_john))
+df_john_top100 <- df_john[1:100,]
+df_romans_rank <- cbind(df_romans[1], 1:nrow(df_romans))
+df_romans_top100 <- df_romans[1:100,]
+
+
+# all 6 books have these common top words:
+allbookwords <- as.data.frame(Reduce(intersect, list(df_genesis_rank[1:100,]$term, df_proverbs_rank[1:100,]$term, df_psalms_rank[1:100,]$term, df_matthew_rank[1:100,]$term,df_john_rank[1:100,]$term,df_romans_rank[1:100,]$term)))
+
+names(allbookwords) <- "term"
+
+
+
+# all 3 old testament books have these common top words:
+
+oldbookwords <- as.data.frame(Reduce(intersect, list(df_genesis_rank[1:100,]$term, df_proverbs_rank[1:100,]$term, df_psalms_rank[1:100,]$term)))
+
+names(oldbookwords) <- "term"
+
+
+# all 3 new testament books have these common top words:
+
+newbookwords <- as.data.frame(Reduce(intersect,list(df_matthew_rank[1:100,]$term,df_john_rank[1:100,]$term,df_romans_rank[1:100,]$term)))
+
+names(newbookwords) <- "term"
+
+
+
+# Let's check frequency of these common words in each old testament.
+
+old_common_words <- merge(x= c(df_genesis_top100),
+                      y = c(df_proverbs_top100),
+                      by = "term",
+                      all.x = FALSE,
+                      all.y = FALSE)
+
+old_common_words <- merge(x = old_common_words,
+                      y = c(df_psalms_top100),
+                      by = "term",
+                      all.x = FALSE,
+                      all.y = FALSE)
+
+names(old_common_words) <- c("term","genesis","proverbs","psalms")
+
+
+print(old_common_words)
+
+```
+
+
+
+#NIV_six_books_length
+
+```{r}
+#### standaization process:
+
+old_common_words_standarized <- old_common_words
+
+for(i in 1:3){
+  old_common_words_standarized[,i+1] <- (old_common_words_standarized[,i+1])/(NIV_six_books_length[i])
+  old_common_words_standarized[,i+1] <- old_common_words_standarized[,i+1] * 1000
+}
+
+old_common_words_standarized
+
+
+
+
+ggplot(data=old_common_words_standarized, aes(x=term, y=c(genesis))) +
+  geom_bar(stat="identity", position=position_dodge())+
+  geom_text(aes(label=term), vjust=1.6, color="white",
+            position = position_dodge(0.9), size=3.5)+
+  scale_fill_brewer(palette="Paired")+
+  theme_minimal()
+
+
+
+```
+
+
+
+```{r}
+# Let's check frequency of these common words in each new testament.
+
+new_common_words <- merge(x= c(df_matthew_top100),
+                      y = c(df_john_top100),
+                      by = "term",
+                      all.x = FALSE,
+                      all.y = FALSE)
+
+new_common_words <- merge(x = new_common_words,
+                      y = c(df_romans_top100),
+                      by = "term",
+                      all.x = FALSE,
+                      all.y = FALSE)
+
+names(new_common_words) <- c("term","matthew","john","romans")
+
+
+print(new_common_words)
+
+
+
+new_common_words_standarized <- new_common_words
+
+for(i in 1:3){
+  new_common_words_standarized[,i+1] <- (new_common_words_standarized[,i+1])/(NIV_six_books_length[i+3])
+  new_common_words_standarized[,i+1] <- new_common_words_standarized[,i+1] * 1000
+}
+
+new_common_words_standarized
+
+
+
+
+
+
+
+
+```
+
+
+
+```{r}
+### all 6 books
+
+
+all_common_words <- merge(x= c(df_genesis_top100),
+                      y = c(df_proverbs_top100),
+                      by = "term",
+                      all.x = FALSE,
+                      all.y = FALSE)
+
+all_common_words <- merge(x = all_common_words,
+                      y = c(df_psalms_top100),
+                      by = "term",
+                      all.x = FALSE,
+                      all.y = FALSE)
+
+all_common_words <- merge(x= c(all_common_words),
+                      y = c(df_matthew_top100),
+                      by = "term",
+                      all.x = FALSE,
+                      all.y = FALSE)
+
+all_common_words <- merge(x= c(all_common_words),
+                      y = c(df_john_top100),
+                      by = "term",
+                      all.x = FALSE,
+                      all.y = FALSE)
+
+all_common_words <- merge(x = all_common_words,
+                      y = c(df_romans_top100),
+                      by = "term",
+                      all.x = FALSE,
+                      all.y = FALSE)
+
+
+
+
+
+names(all_common_words) <- c("term","genesis","proverbs","psalms","matthew","john","romans")
+
+
+all_common_words_standarized <- all_common_words
+
+for(i in 1:6){
+  all_common_words_standarized[,i+1] <- (all_common_words_standarized[,i+1])/(NIV_six_books_length[i])
+  all_common_words_standarized[,i+1] <- all_common_words_standarized[,i+1] * 1000
+}
+
+all_common_words_standarized
+
+
+
+
+```
+
+
+
+```{r}
+#write.csv(all_common_words_standarized,"test.csv")
+
+library(readxl)
+test <- read_excel("/Users/Huanzhenye/test.xlsx")
+View(test)
+
+all_words <- as.data.frame(test)
+
+ggplot(data=all_words, aes(x=book, y=value, fill=term)) +
+  geom_bar(stat="identity", position=position_dodge())+
+  theme_minimal()
+
+
+ggplot(data=all_words, aes(x=term, y=value, fill=book)) +
+  geom_bar(stat="identity", position=position_dodge())+
+  theme_minimal()
+
+
+
+
+
+#old
+
+old_words <- subset.data.frame(all_words,book == c("genesis","proverbs", "psalms"))
+
+ggplot(data=old_words, aes(x=book, y=value, fill=term)) +
+  geom_bar(stat="identity", position=position_dodge())+
+  theme_minimal()
+
+
+ggplot(data=old_words, aes(x=term, y=value, fill=book)) +
+  geom_bar(stat="identity", position=position_dodge())+
+  theme_minimal()
+
+
+
+#new
+
+new_words <- subset.data.frame(all_words,book == c("matthew","john", "romans"))
+
+ggplot(data=new_words, aes(x=book, y=value, fill=term)) +
+  geom_bar(stat="identity", position=position_dodge())+
+  theme_minimal()
+
+
+ggplot(data=new_words, aes(x=term, y=value, fill=book)) +
+  geom_bar(stat="identity", position=position_dodge())+
+  theme_minimal()
+
+
+
+
+
+```
+
+#association
+
+```{r}
+#Findassocs calculates its correlation with every other word in a TDM or DTM. Scores range from 0 to 1. A score of 1 means that two words always appear together in documents, while a score approaching 0 means the terms seldom appear in the same document.
+
+#Finding association of three words 
+associations <- findAssocs(NIV_Genesis_dtm, c("shall","father","lord"), c(0.16,0.16,0.16))
+associations <- findAssocs(NIV_Genesis_dtm, "bitter", 0.19)
+#a numeric vector (of the same length as terms; recycled otherwise) for the (inclusive) lower correlation limits of each term in the range from zero to one.
+associations_df <- list_vect2df(associations, col2 = "word", col3 = "score")
+
+#Plot them out
+ggplot(associations_df, aes(score, word)) + 
+  geom_point(size = 3) 
+#Look for the most frequent 100 words in NIV Genesis
+term.freq <- colSums(as.matrix(NIV_Genesis_dtm))
+
+
+
+
+
+
+#key sentence in context: look at the sentence around a specific words
+toks<-tokens(NIV_Genesis_text,what='sentence')
+mykwic1<-kwic(toks, '\\bshall\\b', valuetype = 'regex', window=2)
+summary(corpus(mykwic1))
+
+# look at the word around shall,lord,god,father
+kwic(NIV_Genesis_text, "god",3)
+summary(corpus(my))
+kwic(NIV_Genesis_text, "shall")
+kwic(NIV_Genesis_text, "lord")
+kwic(NIV_Genesis_text, "father")
+
+
+#Summarize the word hapening before and after god into a corpus
+mykwic <- kwic(NIV_Genesis_text, "god")
+summary(corpus(mykwic))
+
+#Explore the phrase And god in context
+kwic(NIV_Genesis_text, phrase("and god"))
+
+#Mathcing for regular expressions
+```
+
+
+
+
+
+
